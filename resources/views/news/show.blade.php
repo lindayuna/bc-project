@@ -1,0 +1,276 @@
+{{-- filepath: d:\dev\breast-cancer-web\resources\views\news\show.blade.php --}}
+@extends('layouts.app')
+
+@section('title', $content->title . ' - Berita Kesehatan')
+
+@section('content')
+    <div class="min-h-screen bg-gradient-to-br from-pink-50/30 to-white">
+        <!-- Article Header -->
+        <section class="py-8 sm:py-12 md:py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Breadcrumb -->
+                <nav class="mb-6 sm:mb-8">
+                    <ol class="flex items-center text-sm text-gray-600">
+                        <li><a href="{{ route('welcome') }}" class="hover:text-pink-600">Beranda</a></li>
+                        <li class="mx-2">/</li>
+                        <li><a href="{{ route('news.index') }}" class="hover:text-pink-600">Berita</a></li>
+                        <li class="mx-2">/</li>
+                        <li class="text-gray-400">{{ Str::limit($content->title, 50) }}</li>
+                    </ol>
+                </nav>
+
+                <div class="max-w-4xl mx-auto">
+                    <!-- Article Meta -->
+                    <div class="mb-6 sm:mb-8">
+                        <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <span class="bg-pink-500 text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-full">
+                                <i class="fas fa-newspaper mr-1"></i>
+                                Berita Kesehatan
+                            </span>
+                            @if ($content->created_at->diffInDays() < 7)
+                                <span class="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                                    Baru
+                                </span>
+                            @endif
+                        </div>
+
+                        <h1
+                            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight mb-4 sm:mb-6">
+                            {{ $content->title }}
+                        </h1>
+
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-600 mb-6 sm:mb-8">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar mr-2 text-pink-600"></i>
+                                <time>{{ $content->created_at->format('d F Y') }}</time>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock mr-2 text-pink-600"></i>
+                                {{ ceil(str_word_count(strip_tags($content->body)) / 200) }} menit baca
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-eye mr-2 text-pink-600"></i>
+                                {{ $content->views ?? 0 }} kali dibaca
+                            </div>
+                            @if ($content->source)
+                                <div class="flex items-center">
+                                    <i class="fas fa-link mr-2 text-pink-600"></i>
+                                    <span>{{ $content->source }}</span>
+                                </div>
+                            @endif
+                            @if ($content->user)
+                                <div class="flex items-center">
+                                    <i class="fas fa-user mr-2 text-pink-600"></i>
+                                    <span>{{ $content->user->name }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Featured Image -->
+                    @if ($content->image)
+                        <div class="mb-8 sm:mb-10 md:mb-12">
+                            <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg">
+                                <img src="{{ asset('storage/' . $content->image) }}" alt="{{ $content->title }}"
+                                    class="w-full h-64 sm:h-80 md:h-96 object-cover" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Article Content - CARD DIHILANGKAN -->
+                    <article class="mb-8 sm:mb-10 md:mb-12">
+                        <div class="prose prose-lg max-w-none text-gray-700">
+                            {!! nl2br($content->body) !!}
+                        </div>
+                    </article>
+
+                    <!-- Share Section -->
+                    <div
+                        class="bg-gradient-to-r from-pink-50 to-pink-100/50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-pink-200/30 mb-8 sm:mb-10 md:mb-12">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-700 mb-4">Bagikan Artikel Ini</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}"
+                                target="_blank"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                <i class="fab fa-facebook-f mr-2"></i>
+                                Facebook
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->fullUrl()) }}&text={{ urlencode($content->title) }}"
+                                target="_blank"
+                                class="inline-flex items-center px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors text-sm">
+                                <i class="fab fa-twitter mr-2"></i>
+                                Twitter
+                            </a>
+                            <a href="https://wa.me/?text={{ urlencode($content->title . ' - ' . request()->fullUrl()) }}"
+                                target="_blank"
+                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                <i class="fab fa-whatsapp mr-2"></i>
+                                WhatsApp
+                            </a>
+                            <button onclick="copyLink()"
+                                class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm">
+                                <i class="fas fa-link mr-2"></i>
+                                Salin Link
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related News -->
+        @if ($relatedNews->count() > 0)
+            <section class="py-8 sm:py-12 md:py-16 border-t border-gray-200">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-6xl mx-auto">
+                        <h2 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-8 sm:mb-10 text-center">
+                            Berita <span
+                                class="bg-gradient-to-r from-pink-500 to-pink-600 bg-clip-text text-transparent">Terkait</span>
+                        </h2>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                            @foreach ($relatedNews as $related)
+                                <article
+                                    class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group border border-pink-100">
+                                    <a href="{{ route('news.show', $related->slug) }}" class="block">
+                                        <!-- Image -->
+                                        <div class="relative h-40 sm:h-48 overflow-hidden">
+                                            @if ($related->image)
+                                                <img src="{{ asset('storage/' . $related->image) }}"
+                                                    alt="{{ $related->title }}"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            @else
+                                                <div
+                                                    class="w-full h-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center">
+                                                    <i class="fas fa-newspaper text-2xl text-pink-400"></i>
+                                                </div>
+                                            @endif
+
+                                            <div
+                                                class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                                                <i class="fas fa-eye mr-1"></i>{{ $related->views ?? 0 }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="p-4">
+                                            <h3
+                                                class="font-bold text-gray-800 text-sm sm:text-base mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
+                                                {{ $related->title }}
+                                            </h3>
+                                            <p class="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2">
+                                                {{ Str::limit(strip_tags($related->body), 80) }}
+                                            </p>
+                                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                                <time>{{ $related->created_at->format('d M Y') }}</time>
+                                                <span class="text-pink-600 hover:text-pink-700 font-medium">
+                                                    Baca →
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </article>
+                            @endforeach
+                        </div>
+
+                        <!-- View More News -->
+                        <div class="text-center mt-8 sm:mt-10">
+                            <a href="{{ route('news.index') }}"
+                                class="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-pink-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-newspaper mr-3"></i>
+                                Lihat Berita Lainnya
+                                <i class="fas fa-arrow-right ml-3"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+    </div>
+
+    @push('styles')
+        <style>
+            .line-clamp-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .prose {
+                line-height: 1.8;
+                color: #374151;
+                font-size: 1.125rem;
+            }
+
+            .prose p {
+                margin-bottom: 1.5rem;
+                text-align: justify;
+            }
+
+            .prose strong {
+                font-weight: 600;
+                color: #111827;
+            }
+
+            /* Better reading experience */
+            .prose h2 {
+                color: #1f2937;
+                font-weight: 700;
+                font-size: 1.5rem;
+                margin: 2rem 0 1rem 0;
+            }
+
+            .prose h3 {
+                color: #1f2937;
+                font-weight: 600;
+                font-size: 1.25rem;
+                margin: 1.5rem 0 0.75rem 0;
+            }
+
+            .prose blockquote {
+                border-left: 4px solid #ec4899;
+                padding-left: 1rem;
+                font-style: italic;
+                color: #6b7280;
+                margin: 1.5rem 0;
+            }
+
+            .prose ul,
+            .prose ol {
+                margin: 1rem 0;
+                padding-left: 1.5rem;
+            }
+
+            .prose li {
+                margin: 0.5rem 0;
+            }
+        </style>
+    @endpush
+
+    @push('scripts')
+        <script>
+            function copyLink() {
+                navigator.clipboard.writeText(window.location.href).then(function() {
+                    // Show toast notification
+                    const toast = document.createElement('div');
+                    toast.className =
+                        'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                    toast.textContent = 'Link berhasil disalin!';
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 3000);
+                });
+            }
+
+            // Increment views when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                // This could be handled server-side, but shown here for reference
+                console.log('Article viewed');
+            });
+        </script>
+    @endpush
+@endsection

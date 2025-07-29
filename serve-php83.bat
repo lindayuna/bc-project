@@ -1,0 +1,3 @@
+@echo off
+echo Starting Laravel server with PHP 8.3...
+C:\laragon\bin\php\php-8.3.21-nts-Win32-vs16-x64\php.exe artisan serve
