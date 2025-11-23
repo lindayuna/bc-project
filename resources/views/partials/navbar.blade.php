@@ -217,28 +217,62 @@
                                             </div>
                                         </a>
                                     @else
-                                        <a href="{{ route('prediction.form') }}"
-                                            class="flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors duration-200">
-                                            <div
-                                                class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                                <i class="fas fa-play-circle text-green-600 text-sm"></i>
-                                            </div>
-                                            <div>
-                                                <div class="font-medium">Mulai Deteksi Dini</div>
-                                                <div class="text-xs text-gray-500">Deteksi kanker payudara sekarang</div>
-                                            </div>
-                                        </a>
-                                        <a href="{{ route('prediction.history') }}"
-                                            class="flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors duration-200">
-                                            <div
-                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                                <i class="fas fa-history text-blue-600 text-sm"></i>
-                                            </div>
-                                            <div>
-                                                <div class="font-medium">Riwayat Deteksi</div>
-                                                <div class="text-xs text-gray-500">Lihat hasil deteksi sebelumnya</div>
-                                            </div>
-                                        </a>
+                                        @if (Auth::check() && Auth::user()->role === 'user')
+                                            @php
+                                                $lastPrediction = \App\Models\Prediction::where('user_id', Auth::id())
+                                                    ->where('created_at', '>=', \Carbon\Carbon::now()->subDays(30))
+                                                    ->orderBy('created_at', 'desc')
+                                                    ->first();
+                                                $canCreateNew = !$lastPrediction;
+                                                $daysRemaining = $lastPrediction
+                                                    ? \Carbon\Carbon::now()->diffInDays(
+                                                        $lastPrediction->created_at->addDays(30),
+                                                        false,
+                                                    )
+                                                    : 0;
+                                            @endphp
+
+                                            @if ($canCreateNew)
+                                                <a href="{{ route('prediction.form') }}"
+                                                    class="flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                                                    <div
+                                                        class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                                        <i class="fas fa-play-circle text-green-600 text-sm"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-medium">Mulai Deteksi Dini</div>
+                                                        <div class="text-xs text-gray-500">Deteksi kanker payudara sekarang
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @else
+                                                <div
+                                                    class="flex items-center px-4 py-3 text-sm text-gray-500 rounded-lg opacity-60">
+                                                    <div
+                                                        class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                                                        <i class="fas fa-clock text-gray-400 text-sm"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-medium">Prediksi Tersedia Dalam</div>
+                                                        <div class="text-xs text-gray-400">{{ $daysRemaining }} hari lagi
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @else
+                                            <a href="{{ route('prediction.form') }}"
+                                                class="flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                                                <div
+                                                    class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                                    <i class="fas fa-play-circle text-green-600 text-sm"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="font-medium">Mulai Deteksi Dini</div>
+                                                    <div class="text-xs text-gray-500">Deteksi kanker payudara sekarang
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
@@ -548,20 +582,52 @@
                                     Cari Sekarang
                                 </a>
                             @else
-                                <a href="{{ route('prediction.form') }}"
-                                    class="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-white rounded-lg transition-colors duration-200">
-                                    <div class="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center mr-3">
-                                        <i class="fas fa-play-circle text-green-600 text-xs"></i>
-                                    </div>
-                                    Mulai Deteksi Dini
-                                </a>
-                                <a href="{{ route('prediction.history') }}"
-                                    class="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-white rounded-lg transition-colors duration-200">
-                                    <div class="w-6 h-6 bg-blue-100 rounded-md flex items-center justify-center mr-3">
-                                        <i class="fas fa-history text-blue-600 text-xs"></i>
-                                    </div>
-                                    Riwayat Deteksi
-                                </a>
+                                @if (Auth::check() && Auth::user()->role === 'user')
+                                    @php
+                                        $lastPrediction = \App\Models\Prediction::where('user_id', Auth::id())
+                                            ->where('created_at', '>=', \Carbon\Carbon::now()->subDays(30))
+                                            ->orderBy('created_at', 'desc')
+                                            ->first();
+                                        $canCreateNew = !$lastPrediction;
+                                        $daysRemaining = $lastPrediction
+                                            ? \Carbon\Carbon::now()->diffInDays(
+                                                $lastPrediction->created_at->addDays(30),
+                                                false,
+                                            )
+                                            : 0;
+                                    @endphp
+
+                                    @if ($canCreateNew)
+                                        <a href="{{ route('prediction.form') }}"
+                                            class="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-white rounded-lg transition-colors duration-200">
+                                            <div
+                                                class="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center mr-3">
+                                                <i class="fas fa-play-circle text-green-600 text-xs"></i>
+                                            </div>
+                                            Mulai Deteksi Dini
+                                        </a>
+                                    @else
+                                        <div
+                                            class="flex items-center px-4 py-2 text-sm text-gray-500 rounded-lg opacity-60">
+                                            <div
+                                                class="w-6 h-6 bg-gray-100 rounded-md flex items-center justify-center mr-3">
+                                                <i class="fas fa-clock text-gray-400 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium">Prediksi Tersedia Dalam</div>
+                                                <div class="text-xs text-gray-400">{{ $daysRemaining }} hari lagi</div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @else
+                                    <a href="{{ route('prediction.form') }}"
+                                        class="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-white rounded-lg transition-colors duration-200">
+                                        <div class="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center mr-3">
+                                            <i class="fas fa-play-circle text-green-600 text-xs"></i>
+                                        </div>
+                                        Mulai Deteksi Dini
+                                    </a>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -644,7 +710,7 @@
     </div>
 </header>
 
-<!-- CSS PERBAIKAN UNTUK NAVBAR - SIMPLIFIED -->
+<!-- CSS NAVBAR - SIMPLIFIED -->
 <style>
     /* Navbar positioning fix - CRITICAL */
     .navbar-fixed {

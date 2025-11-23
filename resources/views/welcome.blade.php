@@ -21,6 +21,7 @@
 
         <div class="relative container mx-auto px-2 sm:px-4 lg:px-6 pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-16 md:pb-20">
             <div class="flex flex-wrap items-center min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh]">
+                
                 <!-- Left Content -->
                 <div class="w-full lg:w-1/2 mb-12 sm:mb-14 md:mb-16 lg:mb-0">
                     <div class="max-w-full lg:max-w-2xl">

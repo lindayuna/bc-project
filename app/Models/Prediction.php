@@ -13,7 +13,11 @@ class Prediction extends Model
     protected $fillable = [
         'user_id',
         'examination_code',
+        'menstrual_status',
+        'last_menstruation',
+        'menopause_age',
         'faktor_risiko',
+        'faktor_risiko_list',
         'benjolan_di_payudara',
         'kecepatan_tumbuh',
         'benjolan_ketiak',
@@ -26,7 +30,14 @@ class Prediction extends Model
         'venektasi',
         'edema_lengan',
         'nyeri_tulang',
-        'sesak',
+        'sesak'
+    ];
+
+    protected $casts = [
+        'faktor_risiko_list' => 'array',
+        'last_menstruation' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -45,23 +56,23 @@ class Prediction extends Model
 
     /**
      * Generate unique examination code
-     * Format: BC-YYYYMM-XXXX
+     * Format: BCS-YYYYMM-XXXX
      */
     public static function generateExaminationCode()
     {
         do {
-            // BC = Breast Cancer
-            $prefix = 'BC';
-            
+            // BCS = Breast Cancer
+            $prefix = 'BCS';
+
             // YYYYMM = Year and Month (202407 untuk July 2024)
             $yearMonth = date('Ym');
-            
+
             // XXXX = 4 karakter random alphanumeric
             $random = strtoupper(Str::random(4));
-            
-            // Gabungkan: BC-202407-A1B2
+
+            // Gabungkan: BCS-202407-A1B2
             $code = $prefix . '-' . $yearMonth . '-' . $random;
-            
+
             // Pastikan kode belum digunakan
         } while (self::where('examination_code', $code)->exists());
 
@@ -70,15 +81,14 @@ class Prediction extends Model
 
     /**
      * Alternative - Generate shorter code
-     * Format: BCXXXXXX (BC + 6 digit number)
+     * Format: BCSXXXXXX (BCS + 6 digit number)
      */
     public static function generateShortCode()
     {
         do {
-            $prefix = 'BC';
+            $prefix = 'BCS';
             $number = mt_rand(100000, 999999);
             $code = $prefix . $number;
-            
         } while (self::where('examination_code', $code)->exists());
 
         return $code;

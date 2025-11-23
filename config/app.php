@@ -65,7 +65,12 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    // 'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => 'Asia/Makassar',
+
+    'locale' => 'id',
+
+    'faker_locale' => 'id_ID',
 
     /*
     |--------------------------------------------------------------------------

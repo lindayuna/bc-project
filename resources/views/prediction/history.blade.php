@@ -1,10 +1,11 @@
+{{-- resources/views/prediction/history.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Riwayat Prediksi - Breast Cancer Prediction')
 
 @section('content')
     <!-- History Section -->
-    <section class="md:pt-40 pb-12 bg-gray-50 min-h-screen">
+    <section class="md:pt-10 pb-12 bg-gray-50 min-h-screen">
         <div class="container mx-auto px-4">
             <div class="max-w-6xl mx-auto">
 
@@ -18,15 +19,79 @@
                                 <p class="text-gray-600 mt-2">Kelola dan lihat semua hasil prediksi Anda</p>
                             </div>
                             <div class="flex gap-3">
-                                <a href="{{ route('prediction.form') }}"
-                                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-200">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Prediksi Baru
-                                </a>
+                                @php
+                                    $lastPrediction = $predictions
+                                        ->where('created_at', '>=', \Carbon\Carbon::now()->subDays(30))
+                                        ->first();
+                                    $canCreateNew = !$lastPrediction;
+                                    $nextAllowedDate = $lastPrediction
+                                        ? $lastPrediction->created_at->addDays(30)
+                                        : null;
+                                    $daysRemaining = $nextAllowedDate
+                                        ? \Carbon\Carbon::now()->diffInDays($nextAllowedDate, false)
+                                        : 0;
+                                @endphp
+
+                                @if ($canCreateNew)
+                                    <a href="{{ route('prediction.form') }}"
+                                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-200">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Prediksi Baru
+                                    </a>
+                                @else
+                                    <div class="text-center">
+                                        <button disabled
+                                            class="inline-flex items-center px-4 py-2 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed opacity-60">
+                                            <i class="fas fa-clock mr-2"></i>
+                                            Prediksi Baru
+                                        </button>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            Tersedia dalam {{ $daysRemaining }} hari
+                                        </p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Prediction Limit Notice -->
+                @if ($lastPrediction && $daysRemaining > 0)
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-yellow-400 text-lg mt-0.5"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">
+                                    Batas Prediksi Bulanan
+                                </h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>Anda sudah melakukan prediksi pada
+                                        <strong>{{ $lastPrediction->created_at->format('d M Y H:i') }}</strong>.
+                                    </p>
+                                    <p>Prediksi berikutnya dapat dilakukan pada
+                                        <strong>{{ $nextAllowedDate->format('d M Y H:i') }}</strong> ({{ $daysRemaining }}
+                                        hari lagi).
+                                    </p>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="bg-yellow-200 rounded-full h-2">
+                                        @php
+                                            $totalDays = 30;
+                                            $daysPassed = $totalDays - $daysRemaining;
+                                            $progressPercentage = ($daysPassed / $totalDays) * 100;
+                                        @endphp
+                                        <div class="bg-yellow-500 h-2 rounded-full"
+                                            style="width: {{ $progressPercentage }}%"></div>
+                                    </div>
+                                    <p class="text-xs text-yellow-600 mt-1">{{ $daysPassed }} dari {{ $totalDays }}
+                                        hari</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Content Card -->
                 <div class="bg-white rounded-lg shadow-lg">
@@ -36,6 +101,15 @@
                                 <div class="flex">
                                     <i class="fas fa-check-circle mr-2 mt-1"></i>
                                     <span>{{ session('success') }}</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if (session('warning'))
+                            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
+                                <div class="flex">
+                                    <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+                                    <span>{{ session('warning') }}</span>
                                 </div>
                             </div>
                         @endif
@@ -118,7 +192,7 @@
                                                             class="font-medium">{{ $prediction->created_at->format('d M Y') }}</span>
                                                         <span
                                                             class="text-xs text-gray-400">{{ $prediction->created_at->format('H:i') }}
-                                                            WIB</span>
+                                                            WITA</span>
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3 text-sm">
@@ -179,11 +253,19 @@
                                     prediksi Anda.
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <a href="{{ route('prediction.form') }}"
-                                        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-200">
-                                        <i class="fas fa-plus mr-2"></i>
-                                        Mulai Prediksi
-                                    </a>
+                                    @if ($canCreateNew)
+                                        <a href="{{ route('prediction.form') }}"
+                                            class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-200">
+                                            <i class="fas fa-plus mr-2"></i>
+                                            Mulai Prediksi
+                                        </a>
+                                    @else
+                                        <button disabled
+                                            class="inline-flex items-center px-6 py-3 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed">
+                                            <i class="fas fa-clock mr-2"></i>
+                                            Tunggu {{ $daysRemaining }} Hari
+                                        </button>
+                                    @endif
                                     <a href="{{ url('/') }}"
                                         class="inline-flex items-center px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition duration-200">
                                         <i class="fas fa-home mr-2"></i>
@@ -244,21 +326,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* Responsive navbar spacing */
-        @media (max-width: 768px) {
-            section {
-                padding-top: 5rem !important;
-                /* pt-20 for mobile */
-            }
-        }
-
-        @media (min-width: 769px) {
-            section {
-                padding-top: 6rem !important;
-                /* pt-24 for desktop */
-            }
-        }
     </style>
 @endpush
 
@@ -273,8 +340,8 @@
                 }, index * 100);
             });
 
-            // Add tooltips for status badges
-            const statusBadges = document.querySelectorAll('[class*="bg-red-100"], [class*="bg-green-100"]');
+            // Add tooltip to status badges
+            const statusBadges = document.querySelectorAll('.rounded-full');
             statusBadges.forEach(badge => {
                 badge.addEventListener('mouseenter', function() {
                     const isRisk = this.textContent.includes('Berisiko');

@@ -47,7 +47,7 @@
                                 </div>
                                 <h3
                                     class="text-2xl font-bold mb-2 print:text-xl print:mb-2 {{ $prediction->result->prediction === 'breast cancer' ? 'text-red-800' : 'text-green-800' }}">
-                                    {{ $prediction->result->prediction === 'breast cancer' ? 'ANDA MEMILIKI PELUANG UNTUK MENGALAMI KANKER PAYUDARA' : 'SAAT INI ANDA TIDAK MEMILIKI PELUANG UNTUK MENGALAMI KANKER PAYUDARA' }}
+                                    {{ $prediction->result->prediction === 'breast cancer' ? 'ANDA MEMILIKI RISIKO UNTUK MENGALAMI KANKER PAYUDARA' : 'SAAT INI ANDA TIDAK MEMILIKI PELUANG UNTUK MENGALAMI KANKER PAYUDARA' }}
                                 </h3>
                                 <p
                                     class="text-lg print:text-base {{ $prediction->result->prediction === 'breast cancer' ? 'text-red-700' : 'text-green-700' }}">
@@ -107,7 +107,7 @@
                                     </div>
                                     <h4 class="text-sm font-medium text-gray-700 print:text-xs">Tanggal Tes</h4>
                                     <p class="text-xs text-gray-600 mt-1 print:text-xs">
-                                        {{ $prediction->created_at->format('H:i') }} WIB</p>
+                                        {{ $prediction->created_at->format('H:i') }} WITA</p>
                                 </div>
                             </div>
 
@@ -193,6 +193,93 @@
                                 @endif
                             </div>
 
+                            <!-- User Answers Section -->
+                            <div
+                                class="bg-white border border-gray-200 rounded-lg p-6 mb-6 print:p-4 print:mb-4 print:bg-white print:border-gray-400">
+                                <h4
+                                    class="flex items-center text-lg font-semibold text-gray-800 mb-4 print:text-base print:mb-3">
+                                    <i class="fas fa-clipboard-list mr-2"></i>
+                                    Detail Jawaban Pemeriksaan
+                                </h4>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2 print:gap-3">
+                                    @php
+                                        $questions = [
+                                            'faktor_risiko' => 'Adanya faktor risiko kanker payudara',
+                                            'benjolan_di_payudara' => 'Benjolan di payudara',
+                                            'kecepatan_tumbuh' => 'Kecepatan tumbuh benjolan',
+                                            'benjolan_ketiak' => 'Benjolan di ketiak',
+                                            'nipple_discharge' => 'Cairan keluar dari puting',
+                                            'retraksi_putting_susu' => 'Retraksi puting susu',
+                                            'krusta' => 'Krusta pada puting/areola',
+                                            'dimpling' => 'Dimpling (cekungan) pada kulit payudara',
+                                            'peau_dorange' => 'Peau d\'orange (kulit seperti jeruk)',
+                                            'ulserasi' => 'Ulserasi pada kulit payudara',
+                                            'venektasi' => 'Venektasi (pelebaran pembuluh darah)',
+                                            'edema_lengan' => 'Edema (pembengkakan) lengan',
+                                            'nyeri_tulang' => 'Nyeri tulang',
+                                            'sesak' => 'Sesak nafas',
+                                        ];
+                                    @endphp
+
+                                    @foreach ($questions as $field => $question)
+                                        @if (isset($prediction->$field))
+                                            <div
+                                                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 print:p-2 print:bg-gray-50 print:border-gray-300">
+                                                <div class="flex-1">
+                                                    <span
+                                                        class="text-sm font-medium text-gray-700 print:text-xs">{{ $question }}</span>
+                                                </div>
+                                                <div class="ml-3">
+                                                    @if ($prediction->$field === 'ya')
+                                                        <span
+                                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 print:px-2 print:py-0.5 print:text-xs">
+                                                            <i class="fas fa-check-circle mr-1 print:mr-0.5"></i>
+                                                            Ya
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 print:px-2 print:py-0.5 print:text-xs">
+                                                            <i class="fas fa-times-circle mr-1 print:mr-0.5"></i>
+                                                            Tidak
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+
+                                <!-- Summary -->
+                                <div class="mt-4 pt-4 border-t border-gray-200 print:mt-3 print:pt-3 print:border-gray-400">
+                                    @php
+                                        $positiveAnswers = 0;
+                                        $totalAnswers = 0;
+                                        foreach ($questions as $field => $question) {
+                                            if (isset($prediction->$field)) {
+                                                $totalAnswers++;
+                                                if ($prediction->$field === 'ya') {
+                                                    $positiveAnswers++;
+                                                }
+                                            }
+                                        }
+                                        $negativeAnswers = $totalAnswers - $positiveAnswers;
+                                    @endphp
+                                </div>
+                            </div>
+
+                            {{-- Faktor Risiko List --}}
+                            @if ($prediction->faktor_risiko === 'ya' && !empty($prediction->faktor_risiko_list))
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-gray-900">Faktor Risiko yang Dimiliki:</h4>
+                                    <ul class="mt-2 list-disc list-inside text-gray-600">
+                                        @foreach ($prediction->faktor_risiko_list as $faktor)
+                                            <li>{{ $faktor }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <!-- Patient Info for Print -->
                             <div class="hidden print:block print:mb-4">
                                 <div class="border border-gray-400 rounded p-4 bg-gray-50">
@@ -203,12 +290,10 @@
                                             <code
                                                 class="bg-white px-2 py-1 rounded border ml-1">{{ $prediction->examination_code ?? 'N/A' }}</code>
                                         </div>
-                                        <div>
-                                            <span class="font-medium">ID Prediksi:</span> {{ $prediction->id }}
-                                        </div>
+
                                         <div class="col-span-2">
                                             <span class="font-medium">Tanggal & Waktu:</span>
-                                            {{ $prediction->created_at->format('d/m/Y H:i') }} WIB
+                                            {{ $prediction->created_at->format('d/m/Y H:i') }} WITA
                                         </div>
                                     </div>
                                 </div>
@@ -228,7 +313,7 @@
                             <!-- Print Footer -->
                             <div class="hidden print:block print:mt-6 print:pt-4 print:border-t print:border-gray-400">
                                 <div class="text-center text-xs text-gray-600">
-                                    <p>Dokumen ini dicetak pada {{ now()->format('d/m/Y H:i') }} WIB</p>
+                                    <p>Dokumen ini dicetak pada {{ now()->format('d/m/Y H:i') }} WITA</p>
                                     <p class="mt-1">Sistem Prediksi Kanker Payudara - Teknologi AI untuk Deteksi Dini</p>
                                     <p class="mt-1 font-medium">Kode Pemeriksaan: {{ $prediction->examination_code }}</p>
                                 </div>

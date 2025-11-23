@@ -2,17 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasPanelShield, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -23,12 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'phone',
-        'birth_date',
-        'address',
-        'avatar',
-        'role',
-        'google_id',
+        'role', // Column role untuk sistem hybrid
     ];
 
     /**
@@ -50,7 +43,6 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'birth_date' => 'date',
             'password' => 'hashed',
         ];
     }
@@ -58,34 +50,24 @@ class User extends Authenticatable
     /**
      * User has many predictions
      */
-    public function predictions(): HasMany
+    public function predictions()
     {
-        // Check if Prediction model exists, if not return empty collection
-        if (class_exists('\App\Models\Prediction')) {
-            return $this->hasMany(\App\Models\Prediction::class);
-        }
-        
-        // Return empty relationship if Prediction model doesn't exist
-        return $this->hasMany(get_class(), 'non_existent_id', 'non_existent_id');
+        return $this->hasMany(Prediction::class);
     }
 
-    /**
-     * Get the user's avatar URL.
-     */
-    public function getAvatarUrlAttribute()
+    // Helper methods - prioritas Spatie Permission, fallback ke column role
+    public function isAdmin(): bool
     {
-        if ($this->avatar) {
-            return asset('storage/avatars/' . $this->avatar);
-        }
-        
-        return null;
+        return $this->role === 'admin';
     }
 
-    /**
-     * User has one doctor.
-     */
-    public function doctor()
+    public function isDoctor(): bool
     {
-        return $this->hasOne(Doctor::class);
+        return $this->role === 'doctor';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
     }
 }
